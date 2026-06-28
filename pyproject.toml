@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ontology-viewer"
+version = "0.1.0"
+description = "Local read-only renderer for the SIRIUS ontology YAML."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.27",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=7.0"]
+
+[project.scripts]
+ontology-viewer = "ontology_viewer.__main__:main"
+
+[tool.setuptools]
+packages = ["ontology_viewer"]
+
+[tool.setuptools.package-data]
+ontology_viewer = [
+    "static/*.html",
+    "static/*.js",
+    "static/*.css",
+    "static/vendor/*",
+]

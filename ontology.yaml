@@ -1,0 +1,432 @@
+# SIRIUS Core Ontology — v0
+#
+# Status: Working draft. Not ratified.
+# Source: Working group sessions 1–2 (back-up version, K + Rod).
+# Purpose: Canonical text representation of the v0 ontology — the source
+#          of truth from which diagrams and downstream artefacts derive.
+#
+# Schema (this file):
+#   domains:         list of business domains entities belong to
+#     name:            unique identifier (PascalCase, no spaces)
+#     label:           human-readable name (display form)
+#     owner:           accountable owner (role, not person)
+#     delegates:       optional list of role names with delegated authority
+#     champions:       optional list of role names championing the domain
+#     color:           hex code used for entity fill in diagrams
+#     description:     optional short description of the domain
+#
+#   entities:        list of canonical entities in the ontology
+#     name:            unique identifier (PascalCase)
+#     domain:          reference to a domains[].name (optional but recommended)
+#     description:     what the entity represents in the business
+#     owner:           accountable owner (role, not person) — may differ
+#                      from the domain owner if the entity has a specific
+#                      accountable owner distinct from the domain-level one
+#     status:          canonical | proposed | deferred
+#     aliases:         optional list of common business synonyms
+#     notes:           optional free-text observations or open questions
+#
+#   relationships:   list of typed edges between entities
+#     name:            unique identifier for the relationship
+#     from:            source entity name
+#     to:              target entity name
+#     label:           human-readable verb phrase, read from->to
+#     cardinality:     one-to-one | one-to-many | many-to-one | many-to-many
+#     status:          canonical | proposed | deferred
+#     notes:           optional free-text observations or open questions
+#
+#   open_questions:  list of unresolved modelling decisions, captured
+#                    so they don't get lost between sessions.
+
+version: 0.1
+last_updated: 2026-06-28
+ratified: false
+
+domains:
+
+  # Two example domains shown — extend with the rest as the working
+  # group ratifies them. Domain names should be stable identifiers;
+  # labels can be adjusted without breaking entity references.
+
+  - name: PartyAndRelationships
+    label: "Party & Relationships"
+    owner: "VP, Data & AI"
+    delegates:
+      - "Sr. Director, AI & Data Product"
+    champions:
+      - "Director, BI & Analytics"
+    color: "#4A90E2"
+    description: >
+      The Party domain holds the canonical representation of any person
+      or organisation in relationship with RBC Insurance, the roles they
+      play, and their groupings (households). Definitional ownership sits
+      with Data & AI on a provisional basis until a dedicated customer
+      MDM function emerges. Operational stewardship of party data remains
+      with source-system owners.
+
+  - name: PolicyAndContract
+    label: "Policy & Contract"
+    owner: "VP, Client Acquisition & Services"
+    delegates:
+      - "Director, Policy Administration"
+    champions:
+      - "Sr. Manager, Policy Operations"
+    color: "#7B61FF"
+    description: >
+      The Policy & Contract domain covers the legally binding instruments
+      between RBC Insurance and policyholders, including the financial
+      flows (premium, billing) attached to those contracts. Coverage
+      definitions are referenced from the Product domain but instantiated
+      on policies.
+
+entities:
+
+  # ---- Party / Household ----
+
+  - name: Party
+    domain: PartyAndRelationships
+    description: >
+      Any person or organisation in relationship with RBC Insurance,
+      regardless of the role they play. A single Party can simultaneously
+      hold multiple roles (policyholder, payer, insured, beneficiary,
+      prospect) across different policies and products.
+    owner: "Data & AI (provisional — definitional ownership only)"
+    status: canonical
+    aliases: [Client, Customer]
+    notes: >
+      "Customer" connotes an active commercial relationship and is narrower
+      than the canonical Party. A beneficiary who has never purchased a
+      policy is still a Party. Operational ownership of party data remains
+      with source-system owners; Data & AI owns the definition and the
+      entity resolution engine.
+
+  - name: Household
+    description: >
+      Analytical grouping of related parties, used for cross-sell,
+      retention, lifetime value and risk analysis.
+    owner: TBD
+    status: canonical
+    notes: >
+      Membership rules (shared address, shared payer, scored model)
+      are not yet defined. The entity exists; the membership criteria
+      are pending. See open_questions.
+
+  # ---- Policy / Premium / Bill ----
+
+  - name: Policy
+    domain: PolicyAndContract
+    description: >
+      A legally binding contract between RBC Insurance and a policyholder
+      specifying the coverage type, limits, exclusions, premium
+      obligations and effective period of coverage. A Policy is an
+      instance of a Product.
+    owner: "VP, Client Acquisition & Services"
+    status: canonical
+    aliases: [Contract]
+    notes: >
+      Canonical grain is the contract envelope, not the coverage line.
+      Coverage-level details are expressed through the Coverage entity
+      or as Policy attributes.
+
+  - name: Premium
+    description: >
+      The amount charged to a policyholder for coverage under a Policy.
+      Three canonical variants (Written, Earned, In-Force) that must
+      not be used interchangeably.
+    owner: "VP Finance"
+    status: canonical
+
+  - name: PolicyBill
+    description: >
+      The billing artefact issued for a Policy at a point in time.
+      Aggregates one or more Premium charges, plus fees, taxes, and
+      adjustments. Distinct from Premium itself.
+    owner: TBD
+    status: canonical
+    notes: >
+      The thing being billed (Premium) is distinct from the billing
+      artefact (PolicyBill). Resist conflation.
+
+  # ---- Product / Coverage / Pricing ----
+
+  - name: Product
+    description: >
+      A defined insurance offering specifying coverage category,
+      eligibility rules, and rating structure. Master/reference data;
+      does not change based on customer behaviour. A Policy is an
+      instance of a Product.
+    owner: "Chief Underwriting Officer"
+    status: canonical
+
+  - name: Coverage
+    description: >
+      The specific protection offered within a Product. A Product
+      contains one or more Coverages (e.g. a Term 20 product contains
+      a death benefit coverage plus optional riders).
+    owner: "Chief Underwriting Officer"
+    status: canonical
+    notes: >
+      For v0, Coverage is modelled at the Product (template) level.
+      Policy-level coverage instances (sum insured, riders selected,
+      exclusions applied) live as Policy attributes. May be split into
+      a separate PolicyCoverage entity in a future iteration.
+
+  - name: PricingRating
+    description: >
+      The rating structure that defines how premium is calculated for
+      a Product.
+    owner: "Actuarial Pricing"
+    status: proposed
+    notes: >
+      Could alternatively be modelled as attributes of Product. Kept
+      separate in v0 because rating logic is typically versioned
+      independently of the product definition and is regulatorily filed.
+
+  # ---- Application / Underwriting strand ----
+
+  - name: Application
+    description: >
+      A request submitted by a Party for coverage under a Product.
+      Exists independently of any resulting Policy; persists whether
+      the application is accepted, declined or withdrawn.
+    owner: "Chief Underwriting Officer"
+    status: canonical
+
+  - name: RiskAssessment
+    description: >
+      Recorded evaluation of risk associated with an Application,
+      including risk score, factors considered, and assessment date.
+    owner: "Chief Underwriting Officer"
+    status: proposed
+    notes: >
+      Open question: is this a durable artefact distinct from
+      UWDecision, or are the two effectively one record? Resolution
+      requires input from an underwriting SME. If no independent
+      persistence, collapse into UWDecision attributes.
+
+  - name: UWDecision
+    description: >
+      The underwriting outcome for an Application: accept, decline,
+      or accept with modifications. Includes reasoning, decision-maker
+      identity, and decision date.
+    owner: "Chief Underwriting Officer"
+    status: canonical
+
+
+relationships:
+
+  # ---- Party / Household ----
+
+  - name: party_member_of_household
+    from: Party
+    to: Household
+    label: "is member of"
+    cardinality: many-to-one
+    status: canonical
+
+  # ---- Party / Policy — four role relationships ----
+  #
+  # Each role-relationship is many-to-many: a Party can hold the role
+  # across multiple Policies; a Policy can have multiple Parties in the
+  # same role (joint policyholders, multiple beneficiaries).
+
+  - name: party_policyholder_of_policy
+    from: Party
+    to: Policy
+    label: "is policyholder of"
+    cardinality: many-to-many
+    status: canonical
+
+  - name: party_payer_of_policy
+    from: Party
+    to: Policy
+    label: "pays for"
+    cardinality: many-to-many
+    status: canonical
+    notes: >
+      The payer is often not the policyholder (parents paying for adult
+      children, employers paying group, separate billing arrangements).
+
+  - name: party_insured_under_policy
+    from: Party
+    to: Policy
+    label: "is insured under"
+    cardinality: many-to-many
+    status: canonical
+
+  - name: party_beneficiary_of_policy
+    from: Party
+    to: Policy
+    label: "is beneficiary of"
+    cardinality: many-to-many
+    status: canonical
+
+  # ---- Party / Product — prospect ----
+
+  - name: party_prospect_for_product
+    from: Party
+    to: Product
+    label: "is prospect for"
+    cardinality: many-to-many
+    status: canonical
+    notes: >
+      Prospect is a role, not an entity. A Party becomes a prospect
+      for a specific Product. The role ends when an Application is
+      submitted (Party becomes applicant) or when the prospect is
+      closed without conversion.
+
+  # ---- Policy / Product / Coverage / Pricing ----
+
+  - name: policy_instance_of_product
+    from: Policy
+    to: Product
+    label: "is instance of"
+    cardinality: many-to-one
+    status: canonical
+
+  - name: product_contains_coverage
+    from: Product
+    to: Coverage
+    label: "contains"
+    cardinality: one-to-many
+    status: canonical
+
+  - name: product_defined_by_pricing
+    from: Product
+    to: PricingRating
+    label: "defined by"
+    cardinality: one-to-many
+    status: proposed
+    notes: >
+      Inverse: PricingRating "defines" Product. Cardinality reflects
+      that a single Product may have multiple rating versions over time.
+
+  # ---- Policy / Premium / Bill ----
+
+  - name: policy_generates_premium
+    from: Policy
+    to: Premium
+    label: "generates"
+    cardinality: one-to-many
+    status: canonical
+
+  - name: policy_billed_as_bill
+    from: Policy
+    to: PolicyBill
+    label: "billed as"
+    cardinality: one-to-many
+    status: canonical
+
+  - name: premium_appears_on_bill
+    from: Premium
+    to: PolicyBill
+    label: "appears on"
+    cardinality: many-to-one
+    status: canonical
+
+  # ---- Application / Underwriting strand ----
+
+  - name: party_applicant_on_application
+    from: Party
+    to: Application
+    label: "is applicant on"
+    cardinality: one-to-many
+    status: canonical
+
+  - name: application_for_product
+    from: Application
+    to: Product
+    label: "applies for"
+    cardinality: many-to-one
+    status: canonical
+    notes: >
+      An application is always for a specific product. Not on the
+      session-2 whiteboard but implied; added for completeness.
+
+  - name: application_triggers_risk_assessment
+    from: Application
+    to: RiskAssessment
+    label: "triggers"
+    cardinality: one-to-one
+    status: proposed
+    notes: >
+      Cardinality assumes one assessment per application. May be
+      one-to-many if reassessments occur (e.g. after additional
+      medical information). Confirm with UW SME.
+
+  - name: risk_assessment_produces_uw_decision
+    from: RiskAssessment
+    to: UWDecision
+    label: "produces"
+    cardinality: one-to-one
+    status: proposed
+    notes: >
+      Contingent on RiskAssessment existing as a separate entity.
+      See entity notes.
+
+  - name: uw_decision_results_in_policy
+    from: UWDecision
+    to: Policy
+    label: "results in"
+    cardinality: one-to-one
+    status: canonical
+    notes: >
+      Only populated when UWDecision outcome is "accept" (or accept
+      with modifications). Declined / withdrawn applications produce
+      a UWDecision but no Policy.
+
+
+open_questions:
+
+  - id: OQ-001
+    topic: "Household membership criteria"
+    description: >
+      Household exists as an entity, but the rules for determining
+      household membership (shared address, shared payer, scored model,
+      self-declared) are not defined. Different functions may have
+      different operational definitions today.
+    needs_input_from: "Marketing, Claims, AML"
+
+  - id: OQ-002
+    topic: "RiskAssessment as a distinct entity"
+    description: >
+      Whether risk assessment is a durable artefact separate from the
+      UW decision, or whether the evaluation is effectively part of
+      the decision record.
+    needs_input_from: "Underwriting SME"
+
+  - id: OQ-003
+    topic: "PricingRating as entity or Product attribute"
+    description: >
+      Whether pricing/rating logic warrants its own entity (versioning,
+      regulatory filing) or should live as attributes on Product.
+    needs_input_from: "Actuarial Pricing"
+
+  - id: OQ-004
+    topic: "Coverage at Product or Policy level"
+    description: >
+      v0 models Coverage as a Product-level template. Policy-specific
+      coverage instances (sum insured, riders, exclusions) currently
+      live as Policy attributes. May need a separate PolicyCoverage
+      entity in v1 if instance-level coverage modelling becomes
+      analytically important.
+    needs_input_from: "Working group + UW SME"
+
+  - id: OQ-005
+    topic: "Party ownership"
+    description: >
+      Data & AI claims provisional definitional ownership of Party.
+      Operational ownership of party data remains distributed across
+      source systems. Long-term, definitional ownership may transition
+      to a customer/party MDM function if one is established.
+    needs_input_from: "Sabrina (sponsor), operating committee"
+
+  - id: OQ-006
+    topic: "Party-policy role: separate FKs or join entity?"
+    description: >
+      Four role-relationships between Party and Policy can be implemented
+      either as four separate FK columns on Policy (policyholder, payer,
+      insured, beneficiary), or as a single PartyPolicyRole join entity
+      with a role_type discriminator. The conceptual model doesn't change;
+      the implementation does.
+    needs_input_from: "Engineering team (Ankur), once silver-layer build begins"

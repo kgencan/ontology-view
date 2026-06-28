@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ontology Viewer</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Top bar -->
+    <header id="topbar">
+      <h1 id="title">Ontology Viewer</h1>
+      <div class="topbar-actions">
+        <button id="btn-reload" title="Re-read the YAML file from disk">↻ Reload YAML</button>
+        <button id="btn-relayout" title="Re-run the graph layout">⟲ Re-run layout</button>
+        <button id="btn-questions" title="Show open questions">Open questions</button>
+        <button id="btn-presentation" title="Toggle presentation mode">▶ Presentation</button>
+      </div>
+    </header>
+
+    <!-- Main area -->
+    <div id="main">
+      <!-- Left: detail panel -->
+      <aside id="detail-panel" class="panel">
+        <div id="detail-content"><!-- populated by app.js --></div>
+      </aside>
+
+      <!-- Center: graph + validation -->
+      <section id="graph-area">
+        <div id="cy"></div>
+
+        <div id="validation" class="collapsed">
+          <button id="validation-header" type="button">
+            <span id="validation-summary">Validation</span>
+            <span id="validation-toggle">▸</span>
+          </button>
+          <div id="validation-body"><!-- populated by app.js --></div>
+        </div>
+
+        <div id="tooltip" class="hidden"></div>
+      </section>
+
+      <!-- Right: domain legend -->
+      <aside id="legend-panel" class="panel">
+        <h2>Domains</h2>
+        <div id="legend-content"><!-- populated by app.js --></div>
+      </aside>
+    </div>
+
+    <!-- Open questions overlay -->
+    <div id="questions-overlay" class="hidden">
+      <div id="questions-modal">
+        <div class="modal-head">
+          <h2>Open questions</h2>
+          <button id="btn-questions-close" type="button">✕</button>
+        </div>
+        <div id="questions-content"><!-- populated by app.js --></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vendored libraries (offline) -->
+  <script src="vendor/cytoscape.min.js"></script>
+  <script src="vendor/layout-base.js"></script>
+  <script src="vendor/cose-base.js"></script>
+  <script src="vendor/cytoscape-fcose.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
