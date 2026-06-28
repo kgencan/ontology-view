@@ -1,7 +1,7 @@
 # SIRIUS Core Ontology — v0
 #
 # Status: Working draft. Not ratified.
-# Source: Working group sessions 1–2 (back-up version, K + Rod).
+# Source: Working group sessions 1–2.
 # Purpose: Canonical text representation of the v0 ontology — the source
 #          of truth from which diagrams and downstream artefacts derive.
 #
@@ -58,7 +58,7 @@ domains:
     color: "#4A90E2"
     description: >
       The Party domain holds the canonical representation of any person
-      or organisation in relationship with RBC Insurance, the roles they
+      or organisation in relationship with the company, the roles they
       play, and their groupings (households). Definitional ownership sits
       with Data & AI on a provisional basis until a dedicated customer
       MDM function emerges. Operational stewardship of party data remains
@@ -74,7 +74,7 @@ domains:
     color: "#7B61FF"
     description: >
       The Policy & Contract domain covers the legally binding instruments
-      between RBC Insurance and policyholders, including the financial
+      between the company and policyholders, including the financial
       flows (premium, billing) attached to those contracts. Coverage
       definitions are referenced from the Product domain but instantiated
       on policies.
@@ -86,7 +86,7 @@ entities:
   - name: Party
     domain: PartyAndRelationships
     description: >
-      Any person or organisation in relationship with RBC Insurance,
+      Any person or organisation in relationship with the company,
       regardless of the role they play. A single Party can simultaneously
       hold multiple roles (policyholder, payer, insured, beneficiary,
       prospect) across different policies and products.
@@ -116,7 +116,7 @@ entities:
   - name: Policy
     domain: PolicyAndContract
     description: >
-      A legally binding contract between RBC Insurance and a policyholder
+      A legally binding contract between the company and a policyholder
       specifying the coverage type, limits, exclusions, premium
       obligations and effective period of coverage. A Policy is an
       instance of a Product.
