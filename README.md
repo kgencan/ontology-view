@@ -1,6 +1,6 @@
 # Ontology Viewer
 
-A local, **read-only** web app that renders the SIRIUS ontology YAML as an
+A local, **read-only** web app that renders the ontology YAML as an
 interactive graph diagram. Entities are nodes, relationships are labelled
 directed edges, and entities are colour-coded by domain. The app never writes
 to the YAML — editing happens in the YAML file directly (VS Code or any
